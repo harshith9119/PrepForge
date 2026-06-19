@@ -111,13 +111,10 @@ def home():
 def dashboard():
     conn = get_db()
     user_id = session['user_id']
-    
-    # Stats
     total_probs = conn.execute('SELECT COUNT(*) FROM problems').fetchone()[0]
     solved_probs = conn.execute('SELECT COUNT(*) FROM user_progress WHERE user_id = ?', (user_id,)).fetchone()[0]
     user_data = conn.execute('SELECT current_streak FROM users WHERE id = ?', (user_id,)).fetchone()
     
-    # Recent Activity
     recent = conn.execute('''
         SELECT p.title, t.name as topic 
         FROM user_progress up 
@@ -132,6 +129,8 @@ def dashboard():
     
     return render_template('dashboard.html', total=total_probs, solved=solved_probs, 
                            progress=progress, streak=user_data['current_streak'], recent=recent)
+
+
 
 @app.route('/DSA_Roadmap')
 @login_required
@@ -352,12 +351,10 @@ def bulk_upload():
 
 
 @app.route('/api/get-activity')
+@login_required
 def get_activity():
-    if 'user_id' not in session:
-        return jsonify([])
-        
     conn = get_db()
-    # Fetches counts per day for the last year
+    # Ensure date_solved is selected
     activity = conn.execute('''
         SELECT date_solved, COUNT(*) as count 
         FROM user_progress 
@@ -365,8 +362,8 @@ def get_activity():
         GROUP BY date_solved
     ''', (session['user_id'],)).fetchall()
     
-    return jsonify([dict(row) for row in activity])
-
+    # Return as simple dicts
+    return jsonify([{'date': row['date_solved'], 'count': row['count']} for row in activity])
 
 if __name__ == '__main__':
     app.run(debug=True)
