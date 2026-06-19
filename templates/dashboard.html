@@ -46,5 +46,43 @@
             <a href="/DSA_Roadmap" class="mt-6 inline-block w-full text-center bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition">Continue Roadmap &rarr;</a>
         </div>
     </div>
+
+    <div class="heatmap-grid" id="heatmap"></div>
+
+    <script>
+    fetch('/api/get-activity')
+        .then(response => response.json())
+        .then(data => {
+            const grid = document.getElementById('heatmap');
+            
+            // Create a lookup map: {'2026-06-19': 5, '2026-06-18': 2}
+            const activityMap = {};
+            data.forEach(item => {
+                activityMap[item.date_solved] = item.count;
+            });
+
+            // Generate 365 squares for the last year
+            for (let i = 364; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                // Format date as YYYY-MM-DD
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const count = activityMap[dateStr] || 0;
+                
+                const square = document.createElement('div');
+                square.setAttribute('data-level', getLevel(count));
+                square.title = `${dateStr}: ${count} problems solved`;
+                grid.appendChild(square);
+            }
+        });
+
+    function getLevel(count) {
+        if (count === 0) return 0;
+        if (count <= 2) return 1;
+        if (count <= 4) return 2;
+        return 3; // High activity
+    }
+</script>
 </div>
 {% endblock %}

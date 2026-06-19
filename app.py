@@ -6,6 +6,10 @@ from datetime import date, timedelta
 import csv
 import io
 
+from flask import jsonify
+from datetime import datetime, timedelta
+from datetime import date
+
 app = Flask(__name__)
 app.secret_key = 'your_super_secret_key_here' # Change this!
 
@@ -179,9 +183,10 @@ def toggle_problem():
         conn.execute('DELETE FROM user_progress WHERE user_id = ? AND problem_id = ?', (user_id, p_id))
         status = 'unsolved'
     else:
-        conn.execute('INSERT INTO user_progress (user_id, problem_id) VALUES (?, ?)', (user_id, p_id))
+        conn.execute('INSERT INTO user_progress (user_id, problem_id, date_solved) VALUES (?, ?, ?)', 
+                     (user_id, p_id, date.today().isoformat()))
         status = 'solved'
-        update_streak(user_id) # Update streak on solving!
+        update_streak(user_id)
         
     conn.commit()
     conn.close()
@@ -344,6 +349,23 @@ def bulk_upload():
         flash('Please upload a valid .csv file.', 'danger')
         
     return redirect(url_for('admin'))
+
+
+@app.route('/api/get-activity')
+def get_activity():
+    if 'user_id' not in session:
+        return jsonify([])
+        
+    conn = get_db()
+    # Fetches counts per day for the last year
+    activity = conn.execute('''
+        SELECT date_solved, COUNT(*) as count 
+        FROM user_progress 
+        WHERE user_id = ? AND date_solved >= date('now', '-365 days')
+        GROUP BY date_solved
+    ''', (session['user_id'],)).fetchall()
+    
+    return jsonify([dict(row) for row in activity])
 
 
 if __name__ == '__main__':

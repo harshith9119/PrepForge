@@ -4,7 +4,7 @@ def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
-    # Users Table (Added streak tracking)
+    # Users Table
     c.execute('''CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
@@ -22,7 +22,7 @@ def init_db():
                     icon TEXT NOT NULL
                  )''')
 
-    # Problems Table (Added difficulty and company tags)
+    # Problems Table
     c.execute('''CREATE TABLE IF NOT EXISTS problems (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     topic_id INTEGER NOT NULL,
@@ -33,10 +33,11 @@ def init_db():
                     FOREIGN KEY(topic_id) REFERENCES topics(id)
                  )''')
 
-    # User Progress Table (Added timestamp for recent activity)
+    # User Progress Table (Updated with date_solved for Heatmap)
     c.execute('''CREATE TABLE IF NOT EXISTS user_progress (
                     user_id INTEGER,
                     problem_id INTEGER,
+                    date_solved DATE, 
                     solved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (user_id, problem_id),
                     FOREIGN KEY(user_id) REFERENCES users(id),
@@ -44,7 +45,6 @@ def init_db():
                  )''')
 
     # Insert default topics
-    # Insert complete DSA roadmap topics
     topics = [
         ('Basics', 'fas fa-book'), 
         ('Recursion', 'fas fa-redo'), 
@@ -61,7 +61,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    print("Database initialized successfully with all upgraded schemas!")
+    print("Database initialized successfully with the updated schema!")
 
 if __name__ == '__main__':
     init_db()
