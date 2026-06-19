@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <a href="/DSA_Roadmap" class="text-brand hover:underline text-sm"><i class="fas fa-arrow-left"></i> Back to Roadmap</a>
+            <h1 class="text-3xl font-bold text-white mt-2">{{ topic.name }} Problems</h1>
+        </div>
+        
+        <div class="flex gap-2">
+            <button onclick="filterProblems('All')" class="px-3 py-1 bg-gray-700 text-sm rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-brand">All</button>
+            <button onclick="filterProblems('Easy')" class="px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-lg hover:bg-green-500/30">Easy</button>
+            <button onclick="filterProblems('Medium')" class="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-sm rounded-lg hover:bg-yellow-500/30">Medium</button>
+            <button onclick="filterProblems('Hard')" class="px-3 py-1 bg-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/30">Hard</button>
+        </div>
+    </div>
+
+    <div class="mb-6 relative">
+        <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
+        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search problem title or company tags (e.g. Amazon)..." 
+               class="w-full bg-gray-800 border border-gray-700 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-brand">
+    </div>
+
+    <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+        <table class="w-full text-left border-collapse" id="problemTable">
+            <thead>
+                <tr class="bg-gray-900 border-b border-gray-700 text-sm text-gray-400">
+                    <th class="p-4 w-16 text-center">Status</th>
+                    <th class="p-4">Title</th>
+                    <th class="p-4 w-24">Difficulty</th>
+                    <th class="p-4 text-right">Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in problems %}
+                <tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition problem-row" data-diff="{{ p.difficulty }}">
+                    <td class="p-4 text-center">
+                        <input type="checkbox" class="w-5 h-5 accent-brand cursor-pointer" 
+                               {% if p.is_solved %}checked{% endif %} 
+                               onchange="toggleStatus('{{ p.id }}')">
+                    </td>
+                    <td class="p-4 font-medium text-gray-200">
+                        {{ p.title }}
+                        {% if p.company_tags %}
+                            <p class="text-xs text-gray-500 mt-1 tags">{{ p.company_tags }}</p>
+                        {% endif %}
+                    </td>
+                    <td class="p-4">
+                        {% set color = 'green' if p.difficulty == 'Easy' else 'yellow' if p.difficulty == 'Medium' else 'red' %}
+                        <span class="text-xs font-semibold px-2 py-1 rounded bg-{{color}}-500/10 text-{{color}}-400">
+                            {{ p.difficulty }}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <a href="{{ p.url }}" target="_blank" class="text-gray-400 hover:text-white transition bg-gray-700 p-2 rounded-lg">
+                            Solve <i class="fas fa-external-link-alt text-xs"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function toggleStatus(problemId) {
+        fetch('/toggle_problem', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({problem_id: problemId})
+        });
+    }
+
+    // Phase 2: Filtering logic
+    function filterProblems(diff) {
+        document.querySelectorAll('.problem-row').forEach(row => {
+            row.style.display = (diff === 'All' || row.dataset.diff === diff) ? '' : 'none';
+        });
+    }
+
+    // Phase 2: Search logic
+    function searchTable() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.querySelectorAll('.problem-row');
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? '' : 'none';
+        });
+    }
+</script>
+{% endblock %}

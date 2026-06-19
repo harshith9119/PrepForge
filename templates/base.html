@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepForge | DSA Mastery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brand: '#3b82f6', darkbg: '#0f172a' } } } }
+    </script>
+</head>
+<body class="bg-darkbg text-gray-200 min-h-screen font-sans flex flex-col">
+    <nav class="bg-gray-900 border-b border-gray-800 p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-white tracking-wider">
+                <i class="fa-solid fa-code text-brand"></i> PrepForge
+            </a>
+            <div class="flex gap-6 items-center">
+                {% if session.user_id %}
+                    <a href="/dashboard" class="hover:text-brand transition">Dashboard</a>
+                    <a href="/DSA_Roadmap" class="hover:text-brand transition">Roadmap</a>
+                    <a href="/company" class="text-purple-400 hover:text-purple-300 transition font-medium"><i class="fas fa-building"></i> Companies</a>
+                    <a href="/profile" class="hover:text-brand transition"><i class="fas fa-user-circle text-lg"></i></a>
+                    {% if session.is_admin %}
+                        <a href="/admin" class="text-yellow-500 hover:text-yellow-400"><i class="fas fa-crown"></i> Admin</a>
+                    {% endif %}
+                    <a href="/logout" class="bg-red-500/10 text-red-500 px-4 py-2 rounded-lg hover:bg-red-500/20">Logout</a>
+                {% else %}
+                    <a href="/login" class="hover:text-brand transition">Login</a>
+                    <a href="/register" class="bg-brand text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Get Started</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-4 px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-4 mb-4 text-sm rounded-lg {{ 'bg-green-900/50 text-green-400' if category == 'success' else 'bg-red-900/50 text-red-400' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="flex-grow container mx-auto p-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-900 border-t border-gray-800 py-6 text-center mt-12 text-gray-400 text-sm">
+        <p>Built for Placement Dominance. &copy; 2026 PrepForge.</p>
+    </footer>
+</body>
+</html>

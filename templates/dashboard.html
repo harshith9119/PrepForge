@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8 mt-8">
+    <div class="flex justify-between items-end">
+        <div>
+            <h1 class="text-4xl font-bold text-white">Welcome back, {{ session.name }}! 👋</h1>
+            <p class="text-gray-400 mt-2">Let's crush some code today.</p>
+        </div>
+        <div class="bg-gradient-to-r from-orange-500 to-red-500 p-[1px] rounded-xl">
+            <div class="bg-gray-900 px-6 py-3 rounded-xl flex items-center gap-3">
+                <i class="fas fa-fire text-orange-500 text-2xl"></i>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Current Streak</p>
+                    <p class="text-xl font-bold text-white">{{ streak }} Days</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+            <h3 class="text-gray-400 font-medium">Overall Progress</h3>
+            <div class="mt-4 flex items-end gap-2">
+                <span class="text-5xl font-bold text-white">{{ progress }}%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2.5 mt-6">
+                <div class="bg-brand h-2.5 rounded-full" style="width: {{ progress }}%"></div>
+            </div>
+            <p class="text-sm text-gray-400 mt-3">{{ solved }} / {{ total }} Problems Solved</p>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 md:col-span-2">
+            <h3 class="text-gray-400 font-medium mb-4"><i class="fas fa-history"></i> Recent Activity</h3>
+            {% if recent %}
+                <ul class="space-y-3">
+                    {% for item in recent %}
+                        <li class="flex justify-between items-center p-3 bg-gray-900/50 rounded-lg">
+                            <span class="text-white font-medium">{{ item.title }}</span>
+                            <span class="text-xs bg-brand/20 text-brand px-2 py-1 rounded">{{ item.topic }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-500 italic mt-4">No problems solved yet. Time to get started!</p>
+            {% endif %}
+            <a href="/DSA_Roadmap" class="mt-6 inline-block w-full text-center bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition">Continue Roadmap &rarr;</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

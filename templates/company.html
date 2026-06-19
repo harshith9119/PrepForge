@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-6xl mx-auto mt-8">
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-white mb-2">Company-wise Problem Sheets</h1>
+        <p class="text-gray-400">Target your dream company by solving their most frequently asked questions.</p>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3 mb-10">
+        <button onclick="showCompany('All')" id="btn-All" class="company-btn bg-brand text-white px-5 py-2 rounded-full font-medium transition shadow-lg shadow-brand/30">
+            All Targeted
+        </button>
+        {% for company in companies.keys() %}
+            <button onclick="showCompany('{{ company }}')" id="btn-{{ company|replace(' ', '-') }}" class="company-btn bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 px-5 py-2 rounded-full font-medium transition">
+                {{ company }}
+            </button>
+        {% endfor %}
+    </div>
+
+    {% for company, problems in companies.items() %}
+    <div id="section-{{ company|replace(' ', '-') }}" class="company-section mb-10">
+        <h2 class="text-2xl font-bold text-white mb-4 border-l-4 border-brand pl-3">{{ company }} Top Questions</h2>
+        
+        <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-900 border-b border-gray-700 text-sm text-gray-400">
+                        <th class="p-4 w-16 text-center">Status</th>
+                        <th class="p-4">Title</th>
+                        <th class="p-4 w-24">Difficulty</th>
+                        <th class="p-4 text-right">Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in problems %}
+                    <tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition">
+                        <td class="p-4 text-center">
+                            <input type="checkbox" class="w-5 h-5 accent-brand cursor-pointer" 
+                                   {% if p.is_solved %}checked{% endif %} 
+                                   onchange="toggleStatus({{ p.id }})">
+                        </td>
+                        <td class="p-4 font-medium text-gray-200">{{ p.title }}</td>
+                        <td class="p-4">
+                            {% set color = 'green' if p.difficulty == 'Easy' else 'yellow' if p.difficulty == 'Medium' else 'red' %}
+                            <span class="text-xs font-semibold px-2 py-1 rounded bg-{{color}}-500/10 text-{{color}}-400">
+                                {{ p.difficulty }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <a href="{{ p.url }}" target="_blank" class="text-brand hover:text-blue-400 transition">
+                                Solve <i class="fas fa-external-link-alt text-xs ml-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function showCompany(companyName) {
+        // Handle Button Styling
+        document.querySelectorAll('.company-btn').forEach(btn => {
+            btn.classList.remove('bg-brand', 'text-white', 'shadow-lg', 'shadow-brand/30');
+            btn.classList.add('bg-gray-800', 'text-gray-300', 'border-gray-700');
+        });
+        
+        let activeBtnId = companyName === 'All' ? 'btn-All' : 'btn-' + companyName.replace(/\s+/g, '-');
+        let activeBtn = document.getElementById(activeBtnId);
+        
+        activeBtn.classList.remove('bg-gray-800', 'text-gray-300', 'border-gray-700');
+        activeBtn.classList.add('bg-brand', 'text-white', 'shadow-lg', 'shadow-brand/30');
+
+        // Handle Section Visibility
+        document.querySelectorAll('.company-section').forEach(section => {
+            if (companyName === 'All') {
+                section.style.display = 'block';
+            } else {
+                let expectedId = 'section-' + companyName.replace(/\s+/g, '-');
+                section.style.display = section.id === expectedId ? 'block' : 'none';
+            }
+        });
+    }
+
+    // Reusing the toggle function from the topic pages
+    function toggleStatus(problemId) {
+        fetch('/toggle_problem', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({problem_id: problemId})
+        });
+    }
+</script>
+{% endblock %}
