@@ -26,3 +26,13 @@ PrepForge is a professional-grade, full-stack web application designed to help e
                  [ Admin Utilities ]
                          |
                  [ Bulk Upload Script ]
+
+
+
+
+## 🔮 Future Roadmap: Smart AI Mentorship
+
+The next milestone for PrepForge is shifting it from a progress tracker into an active AI-driven study mentor:
+
+* **Retrieval-Augmented Generation (RAG) Integration:** Building a custom RAG architecture using Python to index problem descriptions, constraints, and algorithmic patterns.
+* **Contextual Problem-Solving Agent:** Implementing an interactive assistant that pulls data directly from the SQLite database to guide users with smart hints, code complexity analysis (Time/Space complexities), and edge-case warnings without directly giving away the final answer.
