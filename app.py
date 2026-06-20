@@ -15,7 +15,9 @@ app.secret_key = 'your_super_secret_key_here' # Change this!
 
 # --- Helper Functions ---
 def get_db():
-    conn = sqlite3.connect('database.db')
+    # The timeout=15 tells SQLite to wait up to 15 seconds for the lock to clear 
+    # instead of instantly crashing.
+    conn = sqlite3.connect('database.db', timeout=15) 
     conn.row_factory = sqlite3.Row
     return conn
 
