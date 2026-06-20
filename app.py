@@ -104,6 +104,11 @@ def logout():
 # --- Routes: Core Features ---
 @app.route('/')
 def home():
+    # If the user is already logged in, skip the home page and go to the dashboard
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+        
+    # If they are NOT logged in, show them the landing page
     return render_template('index.html')
 
 @app.route('/dashboard')
@@ -364,6 +369,28 @@ def get_activity():
     
     # Return as simple dicts
     return jsonify([{'date': row['date_solved'], 'count': row['count']} for row in activity])
+
+
+@app.route('/admin/clear_all', methods=['POST'])
+@admin_required
+def clear_all_problems():
+    conn = get_db()
+    try:
+        # 1. Wipe the problems and user progress tables completely
+        conn.execute('DELETE FROM user_progress')
+        conn.execute('DELETE FROM problems')
+        
+        # 2. Reset the problem ID counter back to 1
+        conn.execute('DELETE FROM sqlite_sequence WHERE name="problems"')
+        conn.commit()
+        
+        flash("✅ Success: All problems and progress have been completely wiped!", "success")
+    except Exception as e:
+        flash("An error occurred while trying to clear the database.", "danger")
+    finally:
+        conn.close()
+        
+    return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     app.run(debug=True)
