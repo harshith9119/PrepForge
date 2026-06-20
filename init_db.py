@@ -12,7 +12,8 @@ def init_db():
                     password TEXT NOT NULL,
                     is_admin BOOLEAN DEFAULT 0,
                     current_streak INTEGER DEFAULT 0,
-                    last_active_date DATE
+                    last_active_date DATE,
+                    daily_goal INTEGER DEFAULT 3
                  )''')
 
     # Topics Table

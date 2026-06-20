@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Search | PrepForge{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Search Problems</h1>
+    <p class="text-gray-400 mb-8">Find problems by title, topic, or company tag.</p>
+
+    <form method="GET" action="{{ url_for('search') }}" class="space-y-4 mb-8">
+        <div class="relative">
+            <i class="fas fa-search absolute left-4 top-4 text-gray-500"></i>
+            <input type="text" name="q" value="{{ query }}" autofocus
+                   placeholder="Try 'two sum', 'Amazon', or 'Tree'..."
+                   class="w-full bg-gray-800 border border-gray-700 rounded-xl py-3.5 pl-12 pr-4 text-white focus:outline-none focus:border-brand text-lg">
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="text-sm text-gray-500">Difficulty:</span>
+            <select name="difficulty" onchange="this.form.submit()"
+                    class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-brand">
+                {% for diff in ['All', 'Easy', 'Medium', 'Hard'] %}
+                <option value="{{ diff }}" {% if difficulty == diff %}selected{% endif %}>{{ diff }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-brand hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium">Search</button>
+        </div>
+    </form>
+
+    {% if query or difficulty != 'All' %}
+        <p class="text-sm text-gray-500 mb-4">{{ results|length }} result{% if results|length != 1 %}s{% endif %}</p>
+
+        {% if results %}
+        <div class="space-y-3">
+            {% for p in results %}
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-brand/40 transition" data-problem-id="{{ p.id }}">
+                <div class="flex items-start gap-3 min-w-0">
+                    <input type="checkbox" class="w-5 h-5 accent-brand cursor-pointer mt-0.5 shrink-0"
+                           {% if p.is_solved %}checked{% endif %}
+                           onchange="toggleProblemStatus({{ p.id }}, this)">
+                    <div class="min-w-0">
+                        <p class="font-medium text-white truncate">{{ p.title }}</p>
+                        <p class="text-sm text-gray-400 mt-0.5">{{ p.topic_name }}{% if p.company_tags %} · {{ p.company_tags }}{% endif %}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 shrink-0 ml-8 sm:ml-0">
+                    {% set color = 'green' if p.difficulty == 'Easy' else 'yellow' if p.difficulty == 'Medium' else 'red' %}
+                    <span class="text-xs font-semibold px-2 py-1 rounded bg-{{ color }}-500/10 text-{{ color }}-400">{{ p.difficulty }}</span>
+                    <a href="{{ p.url }}" target="_blank" rel="noopener noreferrer" class="text-brand hover:text-blue-400 text-sm font-medium">
+                        Solve <i class="fas fa-external-link-alt text-xs"></i>
+                    </a>
+                    <a href="{{ url_for('topic', topic_id=p.topic_id) }}" class="text-gray-500 hover:text-gray-300 text-sm">Topic</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16 bg-gray-800 rounded-xl border border-gray-700">
+            <i class="fas fa-search text-4xl text-gray-600 mb-4"></i>
+            <p class="text-gray-400">No problems matched your search.</p>
+        </div>
+        {% endif %}
+    {% else %}
+    <div class="text-center py-12 text-gray-500">
+        <p>Start typing to search the full problem database.</p>
+        <p class="text-sm mt-2">Tip: Press <kbd class="px-2 py-0.5 bg-gray-800 rounded border border-gray-700 text-xs">Ctrl+K</kbd> anywhere for quick search.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

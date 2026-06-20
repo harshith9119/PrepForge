@@ -7,15 +7,23 @@
         <div class="w-32 h-32 bg-gray-900 rounded-full border-4 border-brand flex items-center justify-center shadow-lg shadow-brand/20 z-10">
             <span class="text-5xl font-bold text-brand uppercase">{{ user.name[0] }}</span>
         </div>
-        
-        <div class="text-center md:text-left z-10">
+
+        <div class="text-center md:text-left z-10 flex-1">
             <h1 class="text-4xl font-bold text-white mb-2">{{ user.name }}</h1>
             <p class="text-gray-400 text-lg mb-4"><i class="fas fa-envelope mr-2"></i> {{ user.email }}</p>
-            {% if user.is_admin %}
-                <span class="bg-yellow-500/20 text-yellow-500 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide border border-yellow-500/30">
-                    <i class="fas fa-crown mr-1"></i> Platform Admin
+            <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                {% if user.is_admin %}
+                    <span class="bg-yellow-500/20 text-yellow-500 px-4 py-1.5 rounded-full text-sm font-semibold border border-yellow-500/30">
+                        <i class="fas fa-crown mr-1"></i> Platform Admin
+                    </span>
+                {% endif %}
+                <span class="bg-orange-500/20 text-orange-400 px-4 py-1.5 rounded-full text-sm font-semibold border border-orange-500/30">
+                    <i class="fas fa-fire mr-1"></i> {{ user.current_streak }} Day Streak
                 </span>
-            {% endif %}
+                <a href="{{ url_for('settings') }}" class="bg-gray-700/50 text-gray-300 px-4 py-1.5 rounded-full text-sm hover:bg-gray-700 transition border border-gray-600">
+                    <i class="fas fa-cog mr-1"></i> Settings
+                </a>
+            </div>
         </div>
     </div>
 
@@ -27,8 +35,9 @@
             </div>
             <p class="text-4xl font-bold text-white">{{ solved }} <span class="text-xl text-gray-500">/ {{ total }}</span></p>
             <div class="w-full bg-gray-900 rounded-full h-2 mt-4">
-                <div class="bg-brand h-2 rounded-full" style="width: {{ progress }}%;"></div>
+                <div class="bg-brand h-2 rounded-full transition-all" style="width: {{ progress }}%;"></div>
             </div>
+            <p class="text-sm text-gray-500 mt-2">{{ progress }}% of all problems</p>
         </div>
 
         <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 hover:border-yellow-500/50 transition">
@@ -36,8 +45,40 @@
                 <h3 class="text-gray-400 font-medium">Topics Mastered</h3>
                 <i class="fas fa-trophy text-2xl text-yellow-500/80"></i>
             </div>
-            <p class="text-4xl font-bold text-white">{{ topics_completed }} <span class="text-lg text-gray-400 font-normal ml-2">Categories Completed</span></p>
+            <p class="text-4xl font-bold text-white">{{ topics_completed }}</p>
+            <p class="text-sm text-gray-400 mt-2">Categories fully completed</p>
         </div>
     </div>
+
+    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 mt-6">
+        <h3 class="text-gray-400 font-medium mb-4"><i class="fas fa-chart-bar"></i> Difficulty Breakdown</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {% for diff, color in [('Easy', 'green'), ('Medium', 'yellow'), ('Hard', 'red')] %}
+                {% set stat = difficulty_stats.get(diff, {'total': 0, 'solved': 0}) %}
+                {% set pct = (stat.solved / stat.total * 100)|int if stat.total > 0 else 0 %}
+                <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700/50">
+                    <p class="text-{{ color }}-400 font-semibold text-sm">{{ diff }}</p>
+                    <p class="text-2xl font-bold text-white mt-1">{{ stat.solved }}<span class="text-gray-500 text-lg">/{{ stat.total }}</span></p>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5 mt-3">
+                        <div class="bg-{{ color }}-500 h-1.5 rounded-full" style="width: {{ pct }}%"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if badges %}
+    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 mt-6">
+        <h3 class="text-gray-400 font-medium mb-4"><i class="fas fa-award"></i> Achievements</h3>
+        <div class="flex flex-wrap gap-3">
+            {% for badge in badges %}
+            <div class="flex items-center gap-2 bg-gray-900/60 border border-{{ badge.color }}-500/30 rounded-full px-4 py-2">
+                <i class="fas {{ badge.icon }} text-{{ badge.color }}-400"></i>
+                <span class="text-sm text-white font-medium">{{ badge.label }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

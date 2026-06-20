@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1 class="text-4xl font-bold text-center text-white mb-2 mt-8">DSA Mastery Roadmap</h1>
-<p class="text-center text-gray-400 mb-12">Track your progress category by category.</p>
+<p class="text-center text-gray-400 mb-12">Track your progress category by category. Complete a topic to earn the trophy badge.</p>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
     {% for topic in topics %}
         {% set pct = (topic.solved_problems / topic.total_problems * 100)|int if topic.total_problems > 0 else 0 %}
-        <a href="/topic/{{ topic.id }}" class="block bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:-translate-y-1 hover:border-brand transition duration-300 relative overflow-hidden">
-            
+        <a href="{{ url_for('topic', topic_id=topic.id) }}" class="group block bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:-translate-y-1 hover:border-brand transition duration-300 relative overflow-hidden">
+
             {% if pct == 100 and topic.total_problems > 0 %}
                 <div class="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
                     🏆 Completed
@@ -15,22 +15,28 @@
             {% endif %}
 
             <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 rounded-xl bg-gray-700 flex items-center justify-center text-2xl text-brand">
+                <div class="w-12 h-12 rounded-xl bg-gray-700 group-hover:bg-brand/20 flex items-center justify-center text-2xl text-brand transition">
                     <i class="{{ topic.icon }}"></i>
                 </div>
-                <div>
-                    <h2 class="text-xl font-bold text-white">{{ topic.name }}</h2>
+                <div class="min-w-0">
+                    <h2 class="text-xl font-bold text-white truncate">{{ topic.name }}</h2>
                     <p class="text-sm text-gray-400">{{ topic.solved_problems }} / {{ topic.total_problems }} Solved</p>
                 </div>
             </div>
-            
+
             <div class="flex justify-between text-xs text-gray-400 mb-2">
                 <span>Progress</span>
-                <span>{{ pct }}%</span>
+                <span class="{% if pct == 100 %}text-yellow-400 font-semibold{% endif %}">{{ pct }}%</span>
             </div>
             <div class="w-full bg-gray-900 rounded-full h-2">
-                <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full" style="width: {{ pct }}%;"></div>
+                <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-500" style="width: {{ pct }}%;"></div>
             </div>
+
+            {% if topic.total_problems == 0 %}
+                <p class="text-xs text-gray-500 mt-3 italic">No problems added yet</p>
+            {% elif pct == 0 %}
+                <p class="text-xs text-brand mt-3 opacity-0 group-hover:opacity-100 transition">Start this topic &rarr;</p>
+            {% endif %}
         </a>
     {% endfor %}
 </div>

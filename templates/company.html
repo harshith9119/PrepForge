@@ -6,21 +6,28 @@
         <p class="text-gray-400">Target your dream company by solving their most frequently asked questions.</p>
     </div>
 
+    {% if companies %}
     <div class="flex flex-wrap justify-center gap-3 mb-10">
         <button onclick="showCompany('All')" id="btn-All" class="company-btn bg-brand text-white px-5 py-2 rounded-full font-medium transition shadow-lg shadow-brand/30">
             All Targeted
         </button>
         {% for company in companies.keys() %}
+            {% set stats = company_stats[company] %}
+            {% set pct = (stats.solved / stats.total * 100)|int if stats.total > 0 else 0 %}
             <button onclick="showCompany('{{ company }}')" id="btn-{{ company|replace(' ', '-') }}" class="company-btn bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 px-5 py-2 rounded-full font-medium transition">
-                {{ company }}
+                {{ company }} <span class="text-xs opacity-70 ml-1">({{ pct }}%)</span>
             </button>
         {% endfor %}
     </div>
 
     {% for company, problems in companies.items() %}
+    {% set stats = company_stats[company] %}
     <div id="section-{{ company|replace(' ', '-') }}" class="company-section mb-10">
-        <h2 class="text-2xl font-bold text-white mb-4 border-l-4 border-brand pl-3">{{ company }} Top Questions</h2>
-        
+        <div class="flex justify-between items-end mb-4">
+            <h2 class="text-2xl font-bold text-white border-l-4 border-brand pl-3">{{ company }} Top Questions</h2>
+            <span class="text-sm text-gray-400">{{ stats.solved }}/{{ stats.total }} solved</span>
+        </div>
+
         <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -33,11 +40,11 @@
                 </thead>
                 <tbody>
                     {% for p in problems %}
-                    <tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition">
+                    <tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition" data-problem-id="{{ p.id }}">
                         <td class="p-4 text-center">
-                            <input type="checkbox" class="w-5 h-5 accent-brand cursor-pointer" 
-                                   {% if p.is_solved %}checked{% endif %} 
-                                   onchange="toggleStatus({{ p.id }})">
+                            <input type="checkbox" class="w-5 h-5 accent-brand cursor-pointer"
+                                   {% if p.is_solved %}checked{% endif %}
+                                   onchange="toggleProblemStatus({{ p.id }}, this)">
                         </td>
                         <td class="p-4 font-medium text-gray-200">{{ p.title }}</td>
                         <td class="p-4">
@@ -47,7 +54,7 @@
                             </span>
                         </td>
                         <td class="p-4 text-right">
-                            <a href="{{ p.url }}" target="_blank" class="text-brand hover:text-blue-400 transition">
+                            <a href="{{ p.url }}" target="_blank" rel="noopener noreferrer" class="text-brand hover:text-blue-400 transition">
                                 Solve <i class="fas fa-external-link-alt text-xs ml-1"></i>
                             </a>
                         </td>
@@ -58,40 +65,13 @@
         </div>
     </div>
     {% endfor %}
+
+    {% else %}
+    <div class="text-center py-20 bg-gray-800 rounded-2xl border border-gray-700">
+        <i class="fas fa-building text-5xl text-gray-600 mb-4"></i>
+        <h2 class="text-xl font-bold text-white mb-2">No company tags yet</h2>
+        <p class="text-gray-400 max-w-md mx-auto">Problems with company tags will appear here. Admins can add tags when creating or bulk-uploading problems.</p>
+    </div>
+    {% endif %}
 </div>
-
-<script>
-    function showCompany(companyName) {
-        // Handle Button Styling
-        document.querySelectorAll('.company-btn').forEach(btn => {
-            btn.classList.remove('bg-brand', 'text-white', 'shadow-lg', 'shadow-brand/30');
-            btn.classList.add('bg-gray-800', 'text-gray-300', 'border-gray-700');
-        });
-        
-        let activeBtnId = companyName === 'All' ? 'btn-All' : 'btn-' + companyName.replace(/\s+/g, '-');
-        let activeBtn = document.getElementById(activeBtnId);
-        
-        activeBtn.classList.remove('bg-gray-800', 'text-gray-300', 'border-gray-700');
-        activeBtn.classList.add('bg-brand', 'text-white', 'shadow-lg', 'shadow-brand/30');
-
-        // Handle Section Visibility
-        document.querySelectorAll('.company-section').forEach(section => {
-            if (companyName === 'All') {
-                section.style.display = 'block';
-            } else {
-                let expectedId = 'section-' + companyName.replace(/\s+/g, '-');
-                section.style.display = section.id === expectedId ? 'block' : 'none';
-            }
-        });
-    }
-
-    // Reusing the toggle function from the topic pages
-    function toggleStatus(problemId) {
-        fetch('/toggle_problem', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({problem_id: problemId})
-        });
-    }
-</script>
 {% endblock %}
