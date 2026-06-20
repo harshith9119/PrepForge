@@ -14,7 +14,7 @@ DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db
 
 
 def get_db():
-    conn = sqlite3.connect(DATABASE, timeout=15)
+    conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
